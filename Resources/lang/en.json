@@ -1,0 +1,13 @@
+{
+  "displayName": "English",
+  "Language": "Language",
+  "GeneralSettings": "General Settings",
+  "FilterSettings": "Iris Filter Settings",
+  "AvailableFilters": "Available Filters List",
+  "RefreshList": "Refresh",
+  "ModLoaded": "Iris Filters Loaded",
+  "ModEnabled": "Iris Enabled",
+  "ModDisabled": "Iris Disabled",
+  "ShaderNotCompatible": "Shader is not compatible",
+  "ModNotInitialized": "Mod is not initialized"
+}

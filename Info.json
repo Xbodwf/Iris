@@ -1,0 +1,12 @@
+{
+  "Id": "Iris",
+  "DisplayName": "Iris Filters",
+  "Author": "Xbodwf",
+  "Version": "1.0.0",
+  "ManagerVersion": "0.27.0",
+  "Requirements": [],
+  "AssemblyName": "Iris.dll",
+  "EntryMethod": "Iris.Main.Load",
+  "HomePage": "https://github.com/adofaiex",
+  "Repository": "https://github.com/Xbodwf/Iris"
+}
