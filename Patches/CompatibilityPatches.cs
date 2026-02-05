@@ -5,6 +5,21 @@ namespace Iris.Patches
 {
     public static class CompatibilityPatches
     {
+        [HarmonyPatch(typeof(scnGame))] 
+        public static class GamePatch {
+            [HarmonyPatch(nameof(scnGame.Play)),HarmonyPrefix]
+            public static void Prefix()
+            {
+                FilterManager.SetPlayState(true);
+            }
+            
+            [HarmonyPatch(nameof(scnGame.ResetScene)),HarmonyPostfix]
+            public static void Postfix()
+            {
+                FilterManager.SetPlayState(false);
+            }
+        }
+        /*
         [HarmonyPatch(typeof(scnEditor), nameof(scnEditor.Play))]
         public static class PlayPatch
         {
@@ -22,7 +37,7 @@ namespace Iris.Patches
                 FilterManager.SetPlayState(false);
             }
         }
-        
+        */
         [HarmonyPatch(typeof(scrController))]
         public static class GameControllerPatch
         {
