@@ -9,5 +9,10 @@
   "ModEnabled": "Iris 已启用",
   "ModDisabled": "Iris 已禁用",
   "ShaderNotCompatible": "Shader 不兼容当前版本",
-  "ModNotInitialized": "Mod 未初始化"
+  "ModNotInitialized": "Mod 未初始化",
+  "EnablePosterize": "开启海报化 (Posterize)",
+  "PosterizeDistortion": "色阶深度",
+  "EnableVideoBloom": "开启视频辉光 (VideoBloom)",
+  "BloomAmount": "辉光强度",
+  "BloomThreshold": "亮度阈值"
 }

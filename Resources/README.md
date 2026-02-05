@@ -1,2 +1,2 @@
 # Iris
-An optimized mod for A Dance of Fire and Ice.
+A mod that provides visual effects in ADOFAI

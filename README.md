@@ -1,6 +1,6 @@
 # Iridium
 
-An optimized mod for A Dance of Fire and Ice, focusing on performance, visual customization, and compatibility.
+A mod that provides visual effects in ADOFAI。
 
 [简体中文](#简体中文) | [English](#english-description)
 

@@ -50,8 +50,33 @@ namespace Iris
             {
                 GUILayout.Space(12);
                 
-                // 测试模式开关
-                filters.enableTestMode = UIUtils.M3Switch(filters.enableTestMode, "开启内置测试滤镜 (反色效果)");
+                // Posterize 开关
+                filters.enablePosterize = UIUtils.M3Switch(filters.enablePosterize, Localization.Get("EnablePosterize"));
+                if (filters.enablePosterize)
+                {
+                    GUILayout.BeginHorizontal();
+                    GUILayout.Label(Localization.Get("PosterizeDistortion"), UIUtils.LabelStyle, GUILayout.Width(100));
+                    filters.posterizeDistortion = GUILayout.HorizontalSlider(filters.posterizeDistortion, 1f, 256f);
+                    GUILayout.EndHorizontal();
+                }
+                if (GUI.changed) FilterManager.ApplyFilters();
+
+                GUILayout.Space(8);
+                
+                // VideoBloom 开关
+                filters.enableVideoBloom = UIUtils.M3Switch(filters.enableVideoBloom, Localization.Get("EnableVideoBloom"));
+                if (filters.enableVideoBloom)
+                {
+                    GUILayout.BeginHorizontal();
+                    GUILayout.Label(Localization.Get("BloomAmount"), UIUtils.LabelStyle, GUILayout.Width(100));
+                    filters.videoBloomAmount = GUILayout.HorizontalSlider(filters.videoBloomAmount, 0f, 5f);
+                    GUILayout.EndHorizontal();
+
+                    GUILayout.BeginHorizontal();
+                    GUILayout.Label(Localization.Get("BloomThreshold"), UIUtils.LabelStyle, GUILayout.Width(100));
+                    filters.videoBloomThreshold = GUILayout.HorizontalSlider(filters.videoBloomThreshold, 0f, 1f);
+                    GUILayout.EndHorizontal();
+                }
                 if (GUI.changed) FilterManager.ApplyFilters();
 
                 GUILayout.Space(8);

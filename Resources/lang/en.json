@@ -9,5 +9,10 @@
   "ModEnabled": "Iris Enabled",
   "ModDisabled": "Iris Disabled",
   "ShaderNotCompatible": "Shader is not compatible",
-  "ModNotInitialized": "Mod is not initialized"
+  "ModNotInitialized": "Mod is not initialized",
+  "EnablePosterize": "Enable Posterize",
+  "PosterizeDistortion": "Color Depth",
+  "EnableVideoBloom": "Enable Video Bloom",
+  "BloomAmount": "Bloom Amount",
+  "BloomThreshold": "Threshold"
 }
