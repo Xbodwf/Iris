@@ -13,6 +13,9 @@ namespace Iris.Settings
         public float videoBloomAmount = 1.0f;
         public float videoBloomThreshold = 0.5f;
 
+        // 启用的外部 Shader 列表（仅名称）
+        public List<string> enabledFilters = new();
+
         // 外部 Shader 的配置列表
         // 当用户在 UI 中启用某个扫描到的 Shader 时，会在此列表中添加一项
         public List<FilterConfig> filterConfigs = new();

@@ -30,7 +30,6 @@ namespace Iris.Settings
         public static bool IsActive { get; private set; } = false;
         
         private static List<Material> _activeMaterials = new();
-        private static GameObject? _proxyObject;
 
         // 内置材质缓存
         private static Material? _posterizeMaterial;
@@ -99,8 +98,9 @@ namespace Iris.Settings
 
                             if (s.GetPropertyType(i) == UnityEngine.Rendering.ShaderPropertyType.Range)
                             {
-                                propInfo.MinValue = s.GetPropertyRangeLimits(i, 1); // min
-                                propInfo.MaxValue = s.GetPropertyRangeLimits(i, 2); // max
+                                Vector4 limits = s.GetPropertyRangeLimits(i);
+                                propInfo.MinValue = limits.x; // min
+                                propInfo.MaxValue = limits.y; // max
                             }
 
                             meta.Properties.Add(propInfo);
