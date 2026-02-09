@@ -37,6 +37,9 @@
 		<Reference Include="DOTweenPro">
 			<HintPath>lib\DOTweenPro.dll</HintPath>
 		</Reference>
+		<Reference Include="Newtonsoft.Json">
+			<HintPath>lib\Newtonsoft.Json.dll</HintPath>
+		</Reference>
 		<Reference Include="RDTools">
 			<HintPath>lib\RDTools.dll</HintPath>
 		</Reference>

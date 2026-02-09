@@ -1,8 +1,9 @@
 {
   "Id": "Iris",
-  "DisplayName": "Iris Filters",
+  "DisplayName": "Iris",
+  "Description": "为ADOFAI提供一些视觉功能。",
   "Author": "Xbodwf",
-  "Version": "1.0.0",
+  "Version": "0.11.0",
   "ManagerVersion": "0.27.0",
   "Requirements": [],
   "AssemblyName": "Iris.dll",

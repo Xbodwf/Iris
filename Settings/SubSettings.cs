@@ -19,6 +19,9 @@ namespace Iris.Settings
         // 外部 Shader 的配置列表
         // 当用户在 UI 中启用某个扫描到的 Shader 时，会在此列表中添加一项
         public List<FilterConfig> filterConfigs = new();
+
+        public bool enableKeyviewer = true;
+        public Dictionary<string, bool> kvEnabledStates = new();
     }
 
     public class FilterConfig

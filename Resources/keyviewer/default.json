@@ -1,0 +1,133 @@
+{
+  "name": "Default",
+  "containerPosition": {"x": 100, "y": 100},
+  "globalScale": 1.0,
+  "globalOpacity": 1.0,
+  "globalBorderRadius": 10.0,
+  "gapLength": 8.0,
+  "rainingKeySpeed": 400.0,
+  "rainingKeyThreshold": 500.0,
+  "keys": [
+    {
+      "label": "Tab",
+      "keyCode": 9,
+      "position": {"x": 0, "y": 0},
+      "size": {"x": 80, "y": 60},
+      "foregroundColor": {"r": 1.0, "g": 0.4, "b": 0.7, "a": 1.0},
+      "backgroundColor": {"r": 1.0, "g": 0.9, "b": 0.95, "a": 0.8},
+      "borderWidth": 2.0,
+      "borderColor": {"r": 1.0, "g": 0.6, "b": 0.8, "a": 1.0},
+      "borderRadius": 12.0,
+      "onHold": {
+        "backgroundColor": {"r": 1.0, "g": 0.6, "b": 0.8, "a": 1.0},
+        "foregroundColor": {"r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0},
+        "size": {"x": 81.6, "y": 61.2}
+      }
+    },
+    {
+      "label": "1",
+      "keyCode": 49,
+      "position": {"x": 88, "y": 0},
+      "size": {"x": 60, "y": 60},
+      "foregroundColor": {"r": 1.0, "g": 0.4, "b": 0.7, "a": 1.0},
+      "backgroundColor": {"r": 1.0, "g": 0.9, "b": 0.95, "a": 0.8},
+      "borderWidth": 2.0,
+      "borderColor": {"r": 1.0, "g": 0.6, "b": 0.8, "a": 1.0},
+      "onHold": {
+        "backgroundColor": {"r": 1.0, "g": 0.6, "b": 0.8, "a": 1.0},
+        "foregroundColor": {"r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0},
+        "size": {"x": 61.2, "y": 61.2}
+      }
+    },
+    {
+      "label": "2",
+      "keyCode": 50,
+      "position": {"x": 156, "y": 0},
+      "size": {"x": 60, "y": 60},
+      "foregroundColor": {"r": 1.0, "g": 0.4, "b": 0.7, "a": 1.0},
+      "backgroundColor": {"r": 1.0, "g": 0.9, "b": 0.95, "a": 0.8},
+      "borderWidth": 2.0,
+      "borderColor": {"r": 1.0, "g": 0.6, "b": 0.8, "a": 1.0},
+      "onHold": {
+        "backgroundColor": {"r": 1.0, "g": 0.6, "b": 0.8, "a": 1.0},
+        "foregroundColor": {"r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0},
+        "size": {"x": 61.2, "y": 61.2}
+      }
+    },
+    {
+      "label": "E",
+      "keyCode": 101,
+      "position": {"x": 224, "y": 0},
+      "size": {"x": 60, "y": 60},
+      "foregroundColor": {"r": 1.0, "g": 0.4, "b": 0.7, "a": 1.0},
+      "backgroundColor": {"r": 1.0, "g": 0.9, "b": 0.95, "a": 0.8},
+      "borderWidth": 2.0,
+      "borderColor": {"r": 1.0, "g": 0.6, "b": 0.8, "a": 1.0},
+      "onHold": {
+        "backgroundColor": {"r": 1.0, "g": 0.6, "b": 0.8, "a": 1.0},
+        "foregroundColor": {"r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0},
+        "size": {"x": 61.2, "y": 61.2}
+      }
+    },
+    {
+      "label": "P",
+      "keyCode": 112,
+      "position": {"x": 292, "y": 0},
+      "size": {"x": 60, "y": 60},
+      "foregroundColor": {"r": 1.0, "g": 0.4, "b": 0.7, "a": 1.0},
+      "backgroundColor": {"r": 1.0, "g": 0.9, "b": 0.95, "a": 0.8},
+      "borderWidth": 2.0,
+      "borderColor": {"r": 1.0, "g": 0.6, "b": 0.8, "a": 1.0},
+      "onHold": {
+        "backgroundColor": {"r": 1.0, "g": 0.6, "b": 0.8, "a": 1.0},
+        "foregroundColor": {"r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0},
+        "size": {"x": 61.2, "y": 61.2}
+      }
+    },
+    {
+      "label": "=",
+      "keyCode": 61,
+      "position": {"x": 360, "y": 0},
+      "size": {"x": 60, "y": 60},
+      "foregroundColor": {"r": 1.0, "g": 0.4, "b": 0.7, "a": 1.0},
+      "backgroundColor": {"r": 1.0, "g": 0.9, "b": 0.95, "a": 0.8},
+      "borderWidth": 2.0,
+      "borderColor": {"r": 1.0, "g": 0.6, "b": 0.8, "a": 1.0},
+      "onHold": {
+        "backgroundColor": {"r": 1.0, "g": 0.6, "b": 0.8, "a": 1.0},
+        "foregroundColor": {"r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0},
+        "size": {"x": 61.2, "y": 61.2}
+      }
+    },
+    {
+      "label": "Backspace",
+      "keyCode": 8,
+      "position": {"x": 428, "y": 0},
+      "size": {"x": 100, "y": 60},
+      "foregroundColor": {"r": 1.0, "g": 0.4, "b": 0.7, "a": 1.0},
+      "backgroundColor": {"r": 1.0, "g": 0.9, "b": 0.95, "a": 0.8},
+      "borderWidth": 2.0,
+      "borderColor": {"r": 1.0, "g": 0.6, "b": 0.8, "a": 1.0},
+      "onHold": {
+        "backgroundColor": {"r": 1.0, "g": 0.6, "b": 0.8, "a": 1.0},
+        "foregroundColor": {"r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0},
+        "size": {"x": 102.0, "y": 61.2}
+      }
+    },
+    {
+      "label": "\\\\",
+      "keyCode": 92,
+      "position": {"x": 536, "y": 0},
+      "size": {"x": 60, "y": 60},
+      "foregroundColor": {"r": 1.0, "g": 0.4, "b": 0.7, "a": 1.0},
+      "backgroundColor": {"r": 1.0, "g": 0.9, "b": 0.95, "a": 0.8},
+      "borderWidth": 2.0,
+      "borderColor": {"r": 1.0, "g": 0.6, "b": 0.8, "a": 1.0},
+      "onHold": {
+        "backgroundColor": {"r": 1.0, "g": 0.6, "b": 0.8, "a": 1.0},
+        "foregroundColor": {"r": 1.0, "g": 1.0, "b": 1.0, "a": 1.0},
+        "size": {"x": 61.2, "y": 61.2}
+      }
+    }
+  ]
+}
