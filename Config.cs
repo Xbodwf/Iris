@@ -50,6 +50,7 @@ namespace Iris
             {
                 GUILayout.Space(12);
                 
+                /* 暂时移除内置 Shader 设置
                 // Posterize 开关
                 filters.enablePosterize = UIUtils.M3Switch(filters.enablePosterize, Localization.Get("EnablePosterize"));
                 if (filters.enablePosterize)
@@ -80,6 +81,8 @@ namespace Iris
                 if (GUI.changed) FilterManager.ApplyFilters();
 
                 GUILayout.Space(8);
+                */
+
                 GUILayout.BeginHorizontal();
                 GUILayout.Label(Localization.Get("AvailableFilters"), UIUtils.LabelStyle);
                 GUILayout.FlexibleSpace();
@@ -109,6 +112,7 @@ namespace Iris
 
             GUILayout.Space(8);
 
+            /* 暂时隐藏 Keyviewer 入口
             // Keyviewer Settings Card
             GUILayout.BeginVertical(UIUtils.CardStyle);
             GUILayout.BeginHorizontal();
@@ -150,6 +154,7 @@ namespace Iris
                 }
             }
             GUILayout.EndVertical();
+            */
 
             GUILayout.EndVertical(); // End Left Column
 

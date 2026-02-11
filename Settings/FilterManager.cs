@@ -29,27 +29,28 @@ namespace Iris.Settings
         public static List<ShaderMetadata> AvailableShaders { get; private set; } = new();
         public static bool IsActive { get; private set; } = false;
         
+        private static Dictionary<string, Shader> _shaderCache = new();
         private static List<Material> _activeMaterials = new();
 
-        // 内置材质缓存
-        private static Material? _posterizeMaterial;
-        private static Material? _videoBloomMaterial;
-
-        public static string FilterPath => Path.Combine(Main.Mod!.Path, "Resources", "shaderpacks");
+        public static string FilterPath => Path.Combine(Main.Mod!.Path, "Resources");
 
         public static void ScanFilters()
         {
             if (!Directory.Exists(FilterPath)) Directory.CreateDirectory(FilterPath);
             ScannedFilters.Clear();
             AvailableShaders.Clear();
+            _shaderCache.Clear();
             
             var files = Directory.GetFiles(FilterPath, "*", SearchOption.AllDirectories);
             foreach (var file in files)
             {
                 string ext = Path.GetExtension(file).ToLower();
-                if (ext == ".shaderpack" || ext == ".bundle")
+                if (ext == ".shaderpack" || ext == ".bundle" || ext == "") // Some bundles have no extension
                 {
                     string relativePath = file.Substring(FilterPath.Length + 1);
+                    // 排除 lang 和 keyviewer 文件夹
+                    if (relativePath.StartsWith("lang") || relativePath.StartsWith("keyviewer")) continue;
+
                     ScannedFilters.Add(relativePath);
                     
                     // 扫描文件内的 Shader
@@ -107,8 +108,14 @@ namespace Iris.Settings
                         }
                     }
                     AvailableShaders.Add(meta);
+                    
+                    // 缓存 Shader 引用，避免频繁加载 Bundle
+                    if (!_shaderCache.ContainsKey(s.name))
+                    {
+                        _shaderCache[s.name] = s;
+                    }
                 }
-                bundle.Unload(true); // 扫描完后卸载，Apply 时再按需加载
+                bundle.Unload(false); // 保持 Shader 在内存中
             }
             catch (Exception ex)
             {
@@ -138,36 +145,23 @@ namespace Iris.Settings
 
             Main.Mod?.Logger.Log($"Applying filters...");
             
-            // 1. 加载用户配置的外部 Shader
-            foreach (var config in Main.config.filters.filterConfigs)
+            // 确保已经扫描过 Shader
+            if (AvailableShaders.Count == 0) ScanFilters();
+
+            // 加载用户配置的外部 Shader
+            foreach (var filterName in Main.config.filters.enabledFilters)
             {
-                var meta = AvailableShaders.Find(m => m.ShaderName == config.name);
+                var meta = AvailableShaders.Find(m => m.SourceFile == filterName || m.ShaderName == filterName);
                 if (meta != null)
                 {
+                    // 查找对应的配置
+                    var config = Main.config.filters.filterConfigs.Find(c => c.name == meta.ShaderName);
+                    if (config == null)
+                    {
+                        config = new FilterConfig { name = meta.ShaderName };
+                        // 可以在这里初始化默认参数
+                    }
                     LoadAndApplyShader(meta, config);
-                }
-            }
-
-            // 2. 内置 Posterize
-            if (Main.config.filters.enablePosterize)
-            {
-                if (_posterizeMaterial == null) _posterizeMaterial = CreateMaterialFromCode(InternalShaders.PosterizeShader, "InternalPosterize");
-                if (IsMaterialValid(_posterizeMaterial))
-                {
-                    _posterizeMaterial!.SetFloat("_Distortion", Main.config.filters.posterizeDistortion);
-                    _activeMaterials.Add(_posterizeMaterial);
-                }
-            }
-
-            // 3. 内置 VideoBloom
-            if (Main.config.filters.enableVideoBloom)
-            {
-                if (_videoBloomMaterial == null) _videoBloomMaterial = CreateMaterialFromCode(InternalShaders.VideoBloomShader, "InternalVideoBloom");
-                if (IsMaterialValid(_videoBloomMaterial))
-                {
-                    _videoBloomMaterial!.SetFloat("_BloomAmount", Main.config.filters.videoBloomAmount);
-                    _videoBloomMaterial!.SetFloat("_Threshold", Main.config.filters.videoBloomThreshold);
-                    _activeMaterials.Add(_videoBloomMaterial);
                 }
             }
             
@@ -176,15 +170,22 @@ namespace Iris.Settings
 
         private static void LoadAndApplyShader(ShaderMetadata meta, FilterConfig config)
         {
-            string path = Path.Combine(FilterPath, meta.SourceFile);
-            if (!File.Exists(path)) return;
-
             try
             {
-                AssetBundle bundle = AssetBundle.LoadFromFile(path);
-                if (bundle == null) return;
+                Shader? s = null;
+                if (!_shaderCache.TryGetValue(meta.ShaderName, out s) || s == null)
+                {
+                    string path = Path.Combine(FilterPath, meta.SourceFile);
+                    if (!File.Exists(path)) return;
 
-                Shader s = bundle.LoadAsset<Shader>(meta.ShaderName);
+                    AssetBundle bundle = AssetBundle.LoadFromFile(path);
+                    if (bundle == null) return;
+
+                    s = bundle.LoadAsset<Shader>(meta.ShaderName);
+                    if (s != null) _shaderCache[meta.ShaderName] = s;
+                    bundle.Unload(false);
+                }
+
                 if (s != null)
                 {
                     Material mat = new Material(s);
@@ -201,17 +202,11 @@ namespace Iris.Settings
                         _activeMaterials.Add(mat);
                     }
                 }
-                bundle.Unload(false); // 保持 Shader 在内存中
             }
             catch (Exception ex)
             {
                 Main.Mod?.Logger.Error($"Failed to load shader {meta.ShaderName} from {meta.SourceFile}: {ex.Message}");
             }
-        }
-
-        private static void LoadPack(string name)
-        {
-            // 此方法已被 LoadAndApplyShader 取代，保留空实现或删除
         }
 
         private static bool IsMaterialValid(Material? mat)
@@ -224,25 +219,6 @@ namespace Iris.Settings
                 return false;
             }
             return true;
-        }
-
-        private static Material? CreateMaterialFromCode(string code, string name)
-        {
-            try {
-                Material mat = new Material(code);
-                if (mat != null && mat.shader != null)
-                {
-                    if (!mat.shader.isSupported)
-                    {
-                        Main.Mod?.Logger.Error($"Internal Shader '{name}' compilation failed or not supported (isSupported = false). Check logs for details.");
-                    }
-                    return mat;
-                }
-                return null;
-            } catch (Exception ex) {
-                Main.Mod?.Logger.Error($"Critical error creating internal material {name}: {ex.Message}");
-                return null;
-            }
         }
 
         private static void UpdateCameraEffects()
