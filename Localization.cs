@@ -22,6 +22,21 @@ namespace Iris
             }
         }
 
+        public static string Get(string key)
+        {
+            if (!loaded) Load();
+            string lang = Main.settings?.language ?? "en";
+            if (languages.TryGetValue(lang, out var dict) && dict.TryGetValue(key, out string val))
+            {
+                return val;
+            }
+            if (languages.TryGetValue("en", out var enDict) && enDict.TryGetValue(key, out string enVal))
+            {
+                return enVal;
+            }
+            return key;
+        }
+
         public static string GetDisplayName(string langId)
         {
             if (!loaded) Load();
@@ -105,25 +120,6 @@ namespace Iris
                 }
             }
             return dict;
-        }
-
-        public static string Get(string key)
-        {
-            if (!loaded) Load();
-            
-            string currentLang = "en";
-            if (languages.TryGetValue(currentLang, out var dict) && dict.TryGetValue(key, out string value))
-            {
-                return value;
-            }
-
-            // Fallback to 'en' or first available
-            if (languages.TryGetValue("en", out var enDict) && enDict.TryGetValue(key, out string enValue))
-            {
-                return enValue;
-            }
-
-            return key;
         }
 
         public static string Get(string key, params object[] args)

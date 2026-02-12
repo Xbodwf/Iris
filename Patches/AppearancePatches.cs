@@ -16,6 +16,7 @@ namespace Iris.Patches
         private static Camera? targetCam;
         private static bool hooked = false;
         private static string lastScene = "";
+        private static SkinMode lastMode = (SkinMode)(-1);
 
         // Single/PerScene Resources
         private static Texture2D? singleTex;
@@ -48,14 +49,27 @@ namespace Iris.Patches
             {
                 Main.settings.appearance.EnsureSlideshowSize();
                 string sceneName = SceneManager.GetActiveScene().name;
+                SkinMode currentMode = Main.settings.appearance.mode;
                 bool sceneChanged = sceneName != lastScene;
+                bool modeChanged = currentMode != lastMode;
 
-                if (sceneChanged)
+                if (sceneChanged || modeChanged)
                 {
-                    menuFloors.Clear();
-                    floorRendererCache.Clear();
-                    originalAlphaCache.Clear();
-                    lastScene = sceneName;
+                    if (sceneChanged)
+                    {
+                        menuFloors.Clear();
+                        floorRendererCache.Clear();
+                        originalAlphaCache.Clear();
+                        lastScene = sceneName;
+                    }
+                    lastMode = currentMode;
+                    
+                    if (hooked)
+                    {
+                        Main.Logger?.Log($"AppearancePatches: Scene or Mode changed, re-initializing skin...");
+                        if (currentMode == SkinMode.Slideshow) InitSlideshow();
+                        else StartSingleSkin(sceneName);
+                    }
                 }
 
                 if (IsMenuScene(sceneName) && !InExclusionScene())
@@ -246,7 +260,7 @@ namespace Iris.Patches
 
             if (tex == null || cfg == null) return;
 
-            effectMat ??= new Material(Shader.Find("Unlit/Transparent"));
+            effectMat ??= new Material(Shader.Find("Sprites/Default"));
             effectMat.mainTexture = tex;
             Color finalTint = CalculateFinalTint(cfg);
 

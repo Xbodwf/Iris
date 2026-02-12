@@ -17,14 +17,17 @@ namespace Iris.Settings
 
     public class FilterConfig
     {
-        public string name = "";
+        public string id = ""; // Format: "SourceFile:ShaderName"
+        public string name = ""; // Display name
+        public bool enabled = false;
         public List<FilterParam> paramsList = new();
     }
 
     public class FilterParam
     {
         public string name = "";
-        public float value = 0f;
+        public float[] values = new float[4]; // Support for Float (v[0]), Vector/Color (v[0-3])
+        public string type = "Float";
     }
 
     public class UISettings

@@ -1,56 +1,40 @@
 using HarmonyLib;
 using Iris.Settings;
+using System.Collections.Generic;
+using System.Reflection.Emit;
 
 namespace Iris.Patches
 {
     public static class CompatibilityPatches
     {
-        [HarmonyPatch(typeof(scnGame))] 
-        public static class GamePatch {
-            [HarmonyPatch(nameof(scnGame.Play)),HarmonyPrefix]
-            public static void Prefix()
-            {
-                FilterManager.SetPlayState(true);
-            }
-            
-            [HarmonyPatch(nameof(scnGame.ResetScene)),HarmonyPostfix]
-            public static void Postfix()
-            {
-                FilterManager.SetPlayState(false);
-            }
-        }
-        /*
-        [HarmonyPatch(typeof(scnEditor), nameof(scnEditor.Play))]
-        public static class PlayPatch
+        [HarmonyPatch(typeof(scrController), "Update")]
+        public static class ControllerPlayStatePatch
         {
-            public static void Prefix()
+            public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
             {
-                FilterManager.SetPlayState(true);
+                var codes = new List<CodeInstruction>(instructions);
+                
+                // 在 Update 方法的最开始插入我们的检测逻辑
+                var injection = new List<CodeInstruction>
+                {
+                    new CodeInstruction(OpCodes.Ldarg_0), // 加载 scrController 实例 (this)
+                    new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(ControllerPlayStatePatch), nameof(CheckState)))
+                };
+                
+                codes.InsertRange(0, injection);
+                return codes;
             }
-        }
-        
-        [HarmonyPatch(typeof(scnGame), nameof(scnGame.ResetScene))]
-        public static class StopPatch
-        {
-            public static void Postfix()
+
+            public static void CheckState(scrController __instance)
             {
-                FilterManager.SetPlayState(false);
-            }
-        }
-        */
-        [HarmonyPatch(typeof(scrController))]
-        public static class GameControllerPatch
-        {
-            [HarmonyPatch("Awake"),HarmonyPostfix]
-            public static void Postfix()
-            {
-                if (ADOBase.controller.gameworld) FilterManager.SetPlayState(true);
-            }
-            
-            [HarmonyPatch(nameof(scrController.OnLandOnPortal)),HarmonyPostfix]
-            public static void PostfixLand() 
-            {
-                FilterManager.SetPlayState(false);
+                if (__instance.gameworld)
+                {
+                        FilterManager.SetPlayState(true);
+                }
+                else
+                {
+                    FilterManager.SetPlayState(false);
+                }
             }
         }
     }

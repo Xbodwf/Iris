@@ -20,12 +20,13 @@ namespace Iris.Settings
     {
         public string SourceFile = ""; // Bundle or Shaderpack path
         public string ShaderName = "";
+        public string Id => $"{SourceFile}:{ShaderName}";
         public List<ShaderPropertyInfo> Properties = new();
     }
 
     public static class FilterManager
     {
-        public static List<string> ScannedFilters { get; private set; } = new();
+        public static List<string> ScannedFilters { get; private set; } = new(); // This now stores relative paths to bundles
         public static List<ShaderMetadata> AvailableShaders { get; private set; } = new();
         public static bool IsActive { get; private set; } = false;
         
@@ -39,21 +40,19 @@ namespace Iris.Settings
             if (!Directory.Exists(FilterPath)) Directory.CreateDirectory(FilterPath);
             ScannedFilters.Clear();
             AvailableShaders.Clear();
-            _shaderCache.Clear();
+            // We don't clear shader cache here to avoid re-loading bundles if not necessary, 
+            // but for a clean scan it might be better. Let's keep it for performance.
             
             var files = Directory.GetFiles(FilterPath, "*", SearchOption.AllDirectories);
             foreach (var file in files)
             {
                 string ext = Path.GetExtension(file).ToLower();
-                if (ext == ".shaderpack" || ext == ".bundle" || ext == "") // Some bundles have no extension
+                if (ext == ".shaderpack" || ext == ".bundle" || ext == "") 
                 {
                     string relativePath = file.Substring(FilterPath.Length + 1);
-                    // 排除 lang 和 keyviewer 文件夹
                     if (relativePath.StartsWith("lang") || relativePath.StartsWith("keyviewer")) continue;
 
                     ScannedFilters.Add(relativePath);
-                    
-                    // 扫描文件内的 Shader
                     ScanShadersInBundle(file, relativePath);
                 }
             }
@@ -68,7 +67,6 @@ namespace Iris.Settings
                 AssetBundle bundle = AssetBundle.LoadFromFile(fullPath);
                 if (bundle == null) return;
 
-                // 尝试加载所有 Shader
                 var shaders = bundle.LoadAllAssets<Shader>();
                 foreach (var s in shaders)
                 {
@@ -80,42 +78,44 @@ namespace Iris.Settings
                         ShaderName = s.name
                     };
 
-                    // 提取参数
                     int count = s.GetPropertyCount();
                     for (int i = 0; i < count; i++)
                     {
                         var propName = s.GetPropertyName(i);
-                        // 过滤掉隐藏属性和常用内置属性
-                        if (propName.StartsWith("_") && !propName.Equals("_MainTex") && !propName.Equals("_Distortion") && !propName.Equals("_Fade")) 
+                        if (propName == "_MainTex") continue;
+
+                        var propType = s.GetPropertyType(i);
+                        var propInfo = new ShaderPropertyInfo
                         {
-                            // 如果是开发者明确暴露的属性（通常在 Properties 块中定义）
-                            var propInfo = new ShaderPropertyInfo
-                            {
-                                Name = propName,
-                                Description = s.GetPropertyDescription(i),
-                                Type = s.GetPropertyType(i).ToString(),
-                                DefaultValue = s.GetPropertyDefaultFloatValue(i)
-                            };
+                            Name = propName,
+                            Description = s.GetPropertyDescription(i),
+                            Type = propType.ToString(),
+                            DefaultValue = propType == UnityEngine.Rendering.ShaderPropertyType.Float || propType == UnityEngine.Rendering.ShaderPropertyType.Range 
+                                ? s.GetPropertyDefaultFloatValue(i) : 0f
+                        };
 
-                            if (s.GetPropertyType(i) == UnityEngine.Rendering.ShaderPropertyType.Range)
-                            {
-                                Vector4 limits = s.GetPropertyRangeLimits(i);
-                                propInfo.MinValue = limits.x; // min
-                                propInfo.MaxValue = limits.y; // max
-                            }
-
-                            meta.Properties.Add(propInfo);
+                        if (propType == UnityEngine.Rendering.ShaderPropertyType.Range)
+                        {
+                            Vector4 limits = s.GetPropertyRangeLimits(i);
+                            propInfo.MinValue = limits.x;
+                            propInfo.MaxValue = limits.y;
                         }
+                        else if (propType == UnityEngine.Rendering.ShaderPropertyType.Float)
+                        {
+                            propInfo.MinValue = -1000f;
+                            propInfo.MaxValue = 1000f;
+                        }
+
+                        meta.Properties.Add(propInfo);
                     }
                     AvailableShaders.Add(meta);
                     
-                    // 缓存 Shader 引用，避免频繁加载 Bundle
                     if (!_shaderCache.ContainsKey(s.name))
                     {
                         _shaderCache[s.name] = s;
                     }
                 }
-                bundle.Unload(false); // 保持 Shader 在内存中
+                bundle.Unload(false);
             }
             catch (Exception ex)
             {
@@ -125,6 +125,15 @@ namespace Iris.Settings
 
         public static void SetPlayState(bool playing)
         {
+            if (playing)
+            {
+                Main.Mod?.Logger.Log("FilterManager: Play state started.");
+            }
+            else
+            {
+                Main.Mod?.Logger.Log("FilterManager: Play state stopped.");
+            }
+
             Main.Mod?.Logger.Log($"SetPlayState: {playing}, Active: {IsActive}");
             if (playing && Main.settings.filters.enableFilters)
             {
@@ -138,6 +147,11 @@ namespace Iris.Settings
             }
         }
 
+        public static void ForceUpdate()
+        {
+            if (IsActive) ApplyFilters();
+        }
+
         public static void ApplyFilters()
         {
             ClearFilters();
@@ -145,21 +159,18 @@ namespace Iris.Settings
 
             Main.Mod?.Logger.Log($"Applying filters...");
             
-            // 确保已经扫描过 Shader
             if (AvailableShaders.Count == 0) ScanFilters();
 
-            // 加载用户配置的外部 Shader
-            foreach (var filterName in Main.settings.filters.enabledFilters)
+            foreach (var filterId in Main.settings.filters.enabledFilters)
             {
-                var meta = AvailableShaders.Find(m => m.SourceFile == filterName || m.ShaderName == filterName);
+                var meta = AvailableShaders.Find(m => m.Id == filterId);
                 if (meta != null)
                 {
-                    // 查找对应的配置
-                    var config = Main.settings.filters.filterConfigs.Find(c => c.name == meta.ShaderName);
+                    var config = Main.settings.filters.filterConfigs.Find(c => c.id == meta.Id);
                     if (config == null)
                     {
-                        config = new FilterConfig { name = meta.ShaderName };
-                        // 可以在这里初始化默认参数
+                        config = new FilterConfig { id = meta.Id, name = meta.ShaderName };
+                        Main.settings.filters.filterConfigs.Add(config);
                     }
                     LoadAndApplyShader(meta, config);
                 }
@@ -191,12 +202,18 @@ namespace Iris.Settings
                     Material mat = new Material(s);
                     if (IsMaterialValid(mat))
                     {
-                        // 应用参数
                         foreach (var param in config.paramsList)
                         {
                             if (mat.HasProperty(param.name))
                             {
-                                mat.SetFloat(param.name, param.value);
+                                if (param.type == "Float" || param.type == "Range")
+                                {
+                                    mat.SetFloat(param.name, param.values[0]);
+                                }
+                                else if (param.type == "Vector" || param.type == "Color")
+                                {
+                                    mat.SetVector(param.name, new Vector4(param.values[0], param.values[1], param.values[2], param.values[3]));
+                                }
                             }
                         }
                         _activeMaterials.Add(mat);
@@ -267,25 +284,40 @@ namespace Iris.Settings
                 return;
             }
 
+            if (Materials.Count == 1)
+            {
+                Graphics.Blit(source, destination, Materials[0]);
+                return;
+            }
+
             RenderTexture temp1 = RenderTexture.GetTemporary(source.width, source.height, 0, source.format);
             RenderTexture temp2 = RenderTexture.GetTemporary(source.width, source.height, 0, source.format);
 
-            RenderTexture currentIn = temp1;
-            RenderTexture currentOut = temp2;
-
-            Graphics.Blit(source, currentIn);
+            RenderTexture currentIn = source;
+            RenderTexture currentOut = temp1;
 
             for (int i = 0; i < Materials.Count; i++)
             {
                 if (Materials[i] == null) continue;
-                Graphics.Blit(currentIn, currentOut, Materials[i]);
                 
-                RenderTexture temp = currentIn;
-                currentIn = currentOut;
-                currentOut = temp;
+                // For the last pass, blit directly to destination
+                if (i == Materials.Count - 1)
+                {
+                    Graphics.Blit(currentIn, destination, Materials[i]);
+                }
+                else
+                {
+                    Graphics.Blit(currentIn, currentOut, Materials[i]);
+                    
+                    // Swap buffers for the next pass
+                    if (currentIn == source) currentIn = temp1; // First pass: from source to temp1
+                    
+                    // Swap currentIn and currentOut between temp1 and temp2
+                    RenderTexture nextOut = (currentOut == temp1) ? temp2 : temp1;
+                    currentIn = currentOut;
+                    currentOut = nextOut;
+                }
             }
-
-            Graphics.Blit(currentIn, destination);
 
             RenderTexture.ReleaseTemporary(temp1);
             RenderTexture.ReleaseTemporary(temp2);

@@ -53,6 +53,7 @@ namespace Iris.Patches
 
             // --- Filter Runtime ---
             _definitions.Add(new PatchDef(typeof(CompatibilityPatches), () => true));
+            _definitions.Add(new PatchDef(typeof(CompatibilityPatches.ControllerPlayStatePatch), () => true, typeof(CompatibilityPatches)));
         }
 
         /// <summary>

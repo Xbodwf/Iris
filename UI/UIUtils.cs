@@ -38,7 +38,8 @@ namespace Iris.UI
             {
                 padding = new RectOffset(12, 12, 12, 12),
                 margin = new RectOffset(0, 0, 6, 6),
-                normal = { background = GetCachedRoundedTex(128, 128, 12, surfaceContainer) }
+                normal = { background = GetCachedRoundedTex(128, 128, 12, surfaceContainer) },
+                border = new RectOffset(14, 14, 14, 14)
             };
 
             _headerStyle = new GUIStyle(GUI.skin.label)
@@ -63,7 +64,8 @@ namespace Iris.UI
                 padding = new RectOffset(12, 12, 0, 0),
                 normal = { background = GetCachedRoundedTex(64, 64, 8, surfaceContainerHigh), textColor = primary },
                 hover = { background = GetCachedRoundedTex(64, 64, 8, primary * 0.2f), textColor = Color.white },
-                active = { background = GetCachedRoundedTex(64, 64, 8, primary), textColor = Color.black }
+                active = { background = GetCachedRoundedTex(64, 64, 8, primary), textColor = Color.black },
+                border = new RectOffset(10, 10, 10, 10)
             };
 
             _textFieldStyle = new GUIStyle(GUI.skin.textField)
@@ -133,32 +135,38 @@ namespace Iris.UI
 
             tex = MakeRoundedTex(width, height, radius, col);
             tex.hideFlags = HideFlags.HideAndDontSave;
+            // Set border for 9-slice stretching
+            // Unity's GUIStyle uses 'border' which defines left, right, top, bottom offsets in pixels
+            // For a texture of size (width, height), we want the corners to remain undistorted.
             _textureCache[key] = tex;
             return tex;
         }
 
         private static Texture2D MakeRoundedTex(int width, int height, float radius, Color col)
         {
-            Texture2D tex = new(width, height);
+            Texture2D tex = new(width, height, TextureFormat.RGBA32, false);
+            tex.filterMode = FilterMode.Bilinear;
+            tex.wrapMode = TextureWrapMode.Clamp;
+            
             Color[] pix = new Color[width * height];
 
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
                 {
-                    float dx = Math.Min(x, width - 1 - x);
-                    float dy = Math.Min(y, height - 1 - y);
+                    float dx = x < radius ? radius - x : (x >= width - radius ? x - (width - radius) + 1 : 0);
+                    float dy = y < radius ? radius - y : (y >= height - radius ? y - (height - radius) + 1 : 0);
 
-                    if (dx < radius && dy < radius)
+                    if (dx > 0 && dy > 0)
                     {
-                        float d = (float)Math.Sqrt(Math.Pow(radius - dx, 2) + Math.Pow(radius - dy, 2));
+                        float d = (float)Math.Sqrt(dx * dx + dy * dy);
                         if (d > radius)
                         {
                             pix[y * width + x] = Color.clear;
                         }
                         else
                         {
-                            float alpha = Math.Min(1, radius + 0.5f - d);
+                            float alpha = Mathf.Clamp01(radius + 0.5f - d);
                             pix[y * width + x] = new Color(col.r, col.g, col.b, col.a * alpha);
                         }
                     }

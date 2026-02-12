@@ -117,5 +117,85 @@ Shader ""Hidden/Iris/VideoBloom"" {
     }
     Fallback Off
 }";
+
+        public const string BackgroundShader = @"
+Shader ""Hidden/Iris/Background"" {
+    Properties {
+        _MainTex (""Texture"", 2D) = ""white"" {}
+        _Brightness (""Brightness"", Float) = 1.0
+        _Contrast (""Contrast"", Float) = 1.0
+        _Saturation (""Saturation"", Float) = 1.0
+        _Hue (""Hue"", Float) = 0.0
+        _Opacity (""Opacity"", Float) = 1.0
+    }
+    SubShader {
+        Tags { ""Queue""=""Transparent"" ""RenderType""=""Transparent"" }
+        Cull Off ZWrite Off ZTest Always Blend SrcAlpha OneMinusSrcAlpha
+        Pass {
+            CGPROGRAM
+            #pragma vertex vert
+            #pragma fragment frag
+            #include ""UnityCG.cginc""
+
+            struct appdata {
+                float4 vertex : POSITION;
+                float2 uv : TEXCOORD0;
+                fixed4 color : COLOR;
+            };
+
+            struct v2f {
+                float4 pos : SV_POSITION;
+                float2 uv : TEXCOORD0;
+                fixed4 color : COLOR;
+            };
+
+            sampler2D _MainTex;
+            float _Brightness;
+            float _Contrast;
+            float _Saturation;
+            float _Hue;
+            float _Opacity;
+
+            v2f vert (appdata v) {
+                v2f o;
+                o.pos = UnityObjectToClipPos(v.vertex);
+                o.uv = v.uv;
+                o.color = v.color;
+                return o;
+            }
+
+            float3 ApplyHue(float3 col, float hue) {
+                float angle = hue * 3.14159265 / 180.0;
+                float3 k = float3(0.57735, 0.57735, 0.57735);
+                float cosAngle = cos(angle);
+                return col * cosAngle + cross(k, col) * sin(angle) + k * dot(k, col) * (1.0 - cosAngle);
+            }
+
+            fixed4 frag (v2f i) : SV_Target {
+                fixed4 col = tex2D(_MainTex, i.uv);
+                float3 rgb = col.rgb;
+
+                // Saturation
+                float lum = dot(rgb, float3(0.299, 0.587, 0.114));
+                rgb = lerp(float3(lum, lum, lum), rgb, _Saturation);
+
+                // Contrast
+                rgb = (rgb - 0.5) * _Contrast + 0.5;
+
+                // Brightness
+                rgb *= _Brightness;
+
+                // Hue
+                if (abs(_Hue) > 0.001) {
+                    rgb = ApplyHue(rgb, _Hue);
+                }
+
+                return fixed4(rgb, col.a * _Opacity * i.color.a);
+            }
+            ENDCG
+        }
+    }
+    Fallback Off
+}";
     }
 }
