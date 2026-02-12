@@ -111,7 +111,7 @@ namespace Iris
         {
             if (!loaded) Load();
             
-            string currentLang = Main.config?.language ?? "en";
+            string currentLang = "en";
             if (languages.TryGetValue(currentLang, out var dict) && dict.TryGetValue(key, out string value))
             {
                 return value;

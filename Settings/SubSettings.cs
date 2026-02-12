@@ -1,27 +1,18 @@
+using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Iris.Settings
 {
     public class IrisSettings
     {
         public bool enableFilters = true;
-        
-        public bool enablePosterize = false;
-        public float posterizeDistortion = 64.0f;
-
-        public bool enableVideoBloom = false;
-        public float videoBloomAmount = 1.0f;
-        public float videoBloomThreshold = 0.5f;
 
         // 启用的外部 Shader 列表（仅名称）
         public List<string> enabledFilters = new();
 
         // 外部 Shader 的配置列表
-        // 当用户在 UI 中启用某个扫描到的 Shader 时，会在此列表中添加一项
         public List<FilterConfig> filterConfigs = new();
-
-        public bool enableKeyviewer = true;
-        public Dictionary<string, bool> kvEnabledStates = new();
     }
 
     public class FilterConfig
@@ -38,7 +29,64 @@ namespace Iris.Settings
 
     public class UISettings
     {
-        // 保持 M3 UI 逻辑所需的最小化配置
         public bool showWatermark = true;
+    }
+
+    public enum SkinMode
+    {
+        SingleGlobal,
+        PerScene,
+        Slideshow
+    }
+
+    public class AppearanceSettings
+    {
+        public bool enableMenuSkin = false;
+        public SkinMode mode = SkinMode.SingleGlobal;
+
+        public SkinConfig globalSkin = new();
+
+        public SkinConfig mainUISkin = new();
+        public SkinConfig clsSkin = new();
+        public SkinConfig dlcUISkin = new();
+
+        public float slideDuration = 30f;
+        public int slideshowCount = 3;
+        public SkinConfig[] slideshowSkins = new SkinConfig[20];
+
+        public bool enableTrackCustomization = false;
+        public Color trackColor = Color.white;
+        public float trackBrightness = 1f;
+        public float trackOpacity = 1f;
+        public bool trackColorR = true;
+        public bool trackColorG = true;
+        public bool trackColorB = true;
+
+        public AppearanceSettings()
+        {
+            for (int i = 0; i < 20; i++)
+            {
+                slideshowSkins[i] = new SkinConfig();
+            }
+        }
+
+        public void EnsureSlideshowSize()
+        {
+            slideshowCount = (int)Mathf.Clamp(slideshowCount, 1, 20);
+        }
+    }
+
+    public class SkinConfig
+    {
+        public string path = "";
+        public float scale = 1f;
+        public float offsetX = 0f;
+        public float offsetY = 0f;
+        public float opacity = 1f;
+        public float brightness = 1f;
+        public float saturation = 1f;
+        public float contrast = 1f;
+        public float hue = 0f;
+        public float playbackSpeed = 1f;
     }
 }

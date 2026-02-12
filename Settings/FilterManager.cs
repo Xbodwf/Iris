@@ -126,7 +126,7 @@ namespace Iris.Settings
         public static void SetPlayState(bool playing)
         {
             Main.Mod?.Logger.Log($"SetPlayState: {playing}, Active: {IsActive}");
-            if (playing && Main.config.filters.enableFilters)
+            if (playing && Main.settings.filters.enableFilters)
             {
                 IsActive = true;
                 ApplyFilters();
@@ -149,13 +149,13 @@ namespace Iris.Settings
             if (AvailableShaders.Count == 0) ScanFilters();
 
             // 加载用户配置的外部 Shader
-            foreach (var filterName in Main.config.filters.enabledFilters)
+            foreach (var filterName in Main.settings.filters.enabledFilters)
             {
                 var meta = AvailableShaders.Find(m => m.SourceFile == filterName || m.ShaderName == filterName);
                 if (meta != null)
                 {
                     // 查找对应的配置
-                    var config = Main.config.filters.filterConfigs.Find(c => c.name == meta.ShaderName);
+                    var config = Main.settings.filters.filterConfigs.Find(c => c.name == meta.ShaderName);
                     if (config == null)
                     {
                         config = new FilterConfig { name = meta.ShaderName };
